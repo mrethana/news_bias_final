@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from IPython.display import HTML
 
+
 sources_list = ['abc-news',
  'associated-press',
  'axios',
@@ -172,7 +173,7 @@ def search_news(parameter):
     else:
         print('Enter Search Parameter')
 
-def find_content(Length, Perspective, Limit, Medium):
+def grab_content(Length, Perspective, Limit, Medium):
     df = pd.read_csv('current_search.csv', index_col=0)
     df = df.dropna()
     if Medium == 'Text':
