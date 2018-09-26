@@ -55,3 +55,13 @@ def get_all_vectors_labels(model_name, size, sample_df):
     df = pd.DataFrame(vecs)
     df.index = indexes
     return df
+
+def infer_vectors(model_name,corpus, size):
+    tokenizer = RegexpTokenizer('[A-Za-z]\w+')
+    vecs = np.zeros((len(corpus), size))
+    n = 0
+    for text in corpus:
+        tokenized = tokenizer.tokenize(text)
+        vecs[n] = model_name.infer_vector(text)
+        n += 1
+    return vecs
