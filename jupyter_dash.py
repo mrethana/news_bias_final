@@ -7,6 +7,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 from IPython.display import HTML
+from IPython.display import Image
 
 
 sources_list = ['abc-news',
@@ -166,15 +167,15 @@ def search_news(parameter):
         random_cluster = np.random.randint(1,4,size=sample_size)
         df['length'] = random_article_lengths
         df['cluster'] = random_cluster
-        df.to_csv('current_search.csv')
+        df.to_csv('Archive_CSV/current_search.csv')
         time.sleep(5)
         print('Data Loaded!')
 #         time.sleep(1800)
     else:
         print('Enter Search Parameter')
 
-def grab_content(Length, Perspective, Limit, Medium):
-    df = pd.read_csv('current_search.csv', index_col=0)
+def pull_content(Length, Perspective, Limit, Medium): #idk why this doesn't work in jupyter
+    df = pd.read_csv('Archive_CSV/current_search.csv', index_col=0)
     df = df.dropna()
     if Medium == 'Text':
         df2 = df[(df.length > Length[0]) & (df.length < Length[1]) & (df.cluster == Perspective) & (df.medium == 'text')]
