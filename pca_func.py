@@ -3,24 +3,25 @@ from sklearn.preprocessing import StandardScaler
 import plotly.plotly as py
 import plotly.graph_objs as go
 import matplotlib.pyplot as plt
+import time
 
 from d2v_func import *
 
-sample_df = pd.read_csv('sample_df_for_training.csv',index_col=0)
-model= Doc2Vec.load("d2v.model")
-
-model1_pvecs = get_perspective_vectors(model, 100)
-model1_svecs = get_source_vectors(model, sample_df, 100)
-model1_avecs = get_all_vectors_labels(model, 100,sample_df)
-all_vecs = model1_avecs.append(model1_svecs)
-all_vecs = all_vecs.append(model1_pvecs)
+# sample_df = pd.read_csv('sample_df_for_training.csv',index_col=0)
+# model= Doc2Vec.load("d2v.model")
+#
+# model1_pvecs = get_perspective_vectors(model, 100)
+# model1_svecs = get_source_vectors(model, sample_df, 100)
+# model1_avecs = get_all_vectors_labels(model, 100,sample_df)
+# all_vecs = model1_avecs.append(model1_svecs)
+# all_vecs = all_vecs.append(model1_pvecs)
 
 def PCA_modeling(all_vectors, num_columns):
     #fit vectors to PCA
     scaler = StandardScaler()
-    data_std = scaler.fit_transform(all_vecs)
+    data_std = scaler.fit_transform(all_vectors)
     data_std = pd.DataFrame(data_std)
-    data_std.columns = list(model1_pvecs)
+    # data_std.columns = list(model1_pvecs)
     pca = PCA(n_components=num_columns)
     pca.fit(data_std)
     #plot explained variance
@@ -28,7 +29,7 @@ def PCA_modeling(all_vectors, num_columns):
     explained_variance_ratio = pca.explained_variance_
     plot_explained_variance(x_values,explained_variance_ratio)
     #plot 3 Principal Components
-    PC_df = pd.DataFrame(pca.transform(data_std), index=all_vecs.index)
+    PC_df = pd.DataFrame(pca.transform(data_std), index=all_vectors.index)
     return PC_df
 
 
@@ -64,12 +65,12 @@ def PCA_plot(PCA_DF): #trace options [articles,sources,perspectives]
         mode='markers',
         text=s_df.index,
         marker=dict(
-            size=20,
+            size=30,
             line=dict(
                 color='green',
                 width=0.5
             ),
-            opacity=0.8
+            opacity=1
         )
     )
 
@@ -80,12 +81,12 @@ def PCA_plot(PCA_DF): #trace options [articles,sources,perspectives]
         mode='markers',
         text=p_df.index,
         marker=dict(
-            size=20,
+            size=30,
             line=dict(
                 color='red',
                 width=0.5
             ),
-            opacity=0.8
+            opacity=1
         )
     )
 
@@ -111,3 +112,34 @@ def plot_explained_variance(total_features,exp_variance_ratio):
     ax.set_xlabel('principal component')
     ax.set_ylabel('explained variance')
     plt.show()
+
+def dynamic_PCA(model, vec_size):
+    sample_df = pd.read_csv('Archive_CSV/sample_df_for_training.csv',index_col=0)
+    model1_pvecs = get_perspective_vectors(model, vec_size)
+    model1_svecs = get_source_vectors(model, sample_df, vec_size)
+    model1_avecs = get_all_vectors_labels(model, vec_size,sample_df)
+    all_vecs = model1_avecs.append(model1_svecs)
+    all_vecs = all_vecs.append(model1_pvecs)
+    pc_df = PCA_modeling(all_vecs,vec_size)
+    return PCA_plot(pc_df)
+
+
+def dynamic_PCA_concat(model_1,model_2, vec_size):
+    sample_df = pd.read_csv('Archive_CSV/sample_df_for_training.csv',index_col=0)
+    model1_pvecs = get_perspective_vectors_concat(model_1,model_2, vec_size)
+    model1_svecs = get_source_vectors_concat(model_1,model_2, sample_df, vec_size)
+    model1_avecs = get_all_vectors_labels_concat(model_1,model_2, vec_size,sample_df)
+    all_vecs = model1_avecs.append(model1_svecs)
+    all_vecs = all_vecs.append(model1_pvecs)
+    pc_df = PCA_modeling(all_vecs,vec_size)
+    return PCA_plot(pc_df)
+
+
+def doc_similarity(parameter,model):
+    if len(parameter) > 0:
+        time.sleep(5)
+        return model.docvecs.most_similar(parameter)
+def word_similarity(parameter, model):
+    if len(str(parameter)) > 0:
+        time.sleep(5)
+        return model.most_similar(parameter)
