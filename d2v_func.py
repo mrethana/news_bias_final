@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from gensim.models.doc2vec import Doc2Vec, TaggedDocument
 from gensim.models.phrases import Phrases, Phraser
-
+from nltk.tokenize import RegexpTokenizer
 
 def get_all_vectors(model_name, corpus, size, sample_df):
     data = sample_df.text
