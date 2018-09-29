@@ -46,6 +46,7 @@ def PCA_plot(PCA_DF): #trace options [articles,sources,perspectives]
         x=a_df[0],
         y=a_df[1],
         z=a_df[2],
+        name ='Article',
         mode='markers',
         text=a_df.index,
         marker=dict(
@@ -62,6 +63,7 @@ def PCA_plot(PCA_DF): #trace options [articles,sources,perspectives]
         x=s_df[0],
         y=s_df[1],
         z=s_df[2],
+        name = 'News Source',
         mode='markers',
         text=s_df.index,
         marker=dict(
@@ -78,6 +80,7 @@ def PCA_plot(PCA_DF): #trace options [articles,sources,perspectives]
         x=p_df[0],
         y=p_df[1],
         z=p_df[2],
+        name = 'Perspective',
         mode='markers',
         text=p_df.index,
         marker=dict(
