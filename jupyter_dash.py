@@ -6,8 +6,12 @@ import re
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+import time
 from IPython.display import HTML
 from IPython.display import Image
+from model_evaluation import *
+from d2v_func import *
+from pca_func import *
 
 
 sources_list = ['abc-news',
@@ -150,23 +154,26 @@ def search_news(parameter):
         print('Aggregating...')
         print('Pulling videos...')
         video_df = pd.DataFrame(pull_videos(parameter))
+        video_df['label'] = np.random.choice(['right','left','center'], len(list(video_df.index)), replace=True)
+        video_df['text'] = 'none'
         print('Pulling audio...')
         audio_df = pd.DataFrame(pull_pods(parameter))
+        audio_df['label'] = np.random.choice(['right','left','center'], len(list(audio_df.index)), replace=True)
+        audio_df['text'] = 'none'
         print('Pulling Articles...')
         consolidated = pull_articles(parameter)
         split_source_info(consolidated)
         df = pd.DataFrame(consolidated)
         df = df.drop('source',axis =1)
         df['medium'] = 'text'
+        df = df_all_articles(df)
+        df['label'] = cluster_data('Trigram_DBOW', df, 100)
         df = df.append(video_df, ignore_index=True)
         df = df.append(audio_df, ignore_index=True)
         #temporary fillers
         sample_size = len(list(df.medium))
-        random_polarity = np.random.random_sample(sample_size)
         random_article_lengths = np.random.randint(1,20,size=sample_size)
-        random_cluster = np.random.randint(1,4,size=sample_size)
         df['length'] = random_article_lengths
-        df['cluster'] = random_cluster
         df.to_csv('Archive_CSV/current_search.csv')
         time.sleep(5)
         print('Data Loaded!')
@@ -174,11 +181,12 @@ def search_news(parameter):
     else:
         print('Enter Search Parameter')
 
-def pull_content(Length, Perspective, Limit, Medium): #idk why this doesn't work in jupyter
+def pull_content(Length, Perspective, Limit, Medium):
     df = pd.read_csv('Archive_CSV/current_search.csv', index_col=0)
     df = df.dropna()
     if Medium == 'Text':
-        df2 = df[(df.length > Length[0]) & (df.length < Length[1]) & (df.cluster == Perspective) & (df.medium == 'text')]
+        df2 = df[(df.length > Length[0]) & (df.length < Length[1]) & (df.label == Perspective) & (df.medium == 'text')]
+        df2 = df2.sort_values(['publishedAt'],ascending=False)
         list_tuples = []
         for i in range (0, Limit):
             title = list(df2.title)[i]
@@ -188,7 +196,7 @@ def pull_content(Length, Perspective, Limit, Medium): #idk why this doesn't work
             display(HTML("<a href="+link+">"+source_name+': '+title+"</a>"))
             display(Image(url= image))
     elif Medium == 'Video':
-        df2 = df[(df.length > Length[0]) & (df.length < Length[1]) & (df.cluster == Perspective) & (df.medium == 'video')]
+        df2 = df[(df.length > Length[0]) & (df.length < Length[1]) & (df.label == Perspective) & (df.medium == 'video')]
         list_tuples = []
         for i in range (0, Limit):
             title = list(df2.title)[i]
@@ -198,7 +206,7 @@ def pull_content(Length, Perspective, Limit, Medium): #idk why this doesn't work
             display(HTML("<a href="+link+">"+source_name+': '+title+"</a>"))
             display(HTML('<iframe width="560" height="315" src="https://www.youtube.com/embed/'+link+'?rel=0&amp;controls=0&amp;showinfo=0" frameborder="0" allowfullscreen></iframe>'))
     else:
-        df2 = df[(df.length > Length[0]) & (df.length < Length[1]) & (df.cluster == Perspective) & (df.medium == 'audio')]
+        df2 = df[(df.length > Length[0]) & (df.length < Length[1]) & (df.label == Perspective) & (df.medium == 'audio')]
         list_tuples = []
         if len(list(df2.index)) < 1:
             print('No Audio')
@@ -206,3 +214,42 @@ def pull_content(Length, Perspective, Limit, Medium): #idk why this doesn't work
             for i in range (0, Limit):
                 link = list(df2.url)[i]
                 display(HTML("<iframe src="+"'"+link+"'"+ "style='width:100%; height:100px;' scrolling='no' frameborder='no'></iframe>"))
+
+def df_all_articles(articles_df):
+    articles_df['text'] = np.nan
+    for i in range(0, len(articles_df.text)):
+        if articles_df['source_id'][i] == 'the-huffington-post':
+            pass
+        else:
+            html_page = requests.get(articles_df['url'][i])
+            soup = BeautifulSoup(html_page.content, 'html.parser', from_encoding="iso-8859-1")
+            article = soup.findAll('p')
+            str_list = []
+            list_ = []
+            for j in range(0,len(article)):
+                clean = article[j].text
+                str_list.append(clean)
+            article_ = ' '.join(str_list)
+            item = article_.encode("ascii", "ignore")
+            clean_article = item.decode("utf-8")
+            clean_article = clean_article.strip('\n')
+            articles_df['text'][i] = clean_article
+            print('success' + str(i))
+    return articles_df
+
+def cluster_data(model_name, scraped_data, size):
+    Trigram_DBOW = Doc2Vec.load("D2V_models/TRI_d2v_dbow100.model")
+    best_model = pull_corresponding_logreg_model(model_name)
+    vecs = pd.DataFrame(infer_vectors(Trigram_DBOW,list(scraped_data.text.astype(str)), size))
+    pred = best_model.predict(vecs[vecs.columns[0:size]])
+    return pred
+
+def label_scraped_data(label_dict,scraped_data):
+    label_list = []
+    for index, row in scraped_data.iterrows():
+        if row.source_name in list(label_dict.keys()):
+            label_list.append(label_dict[row.source_name])
+        else:
+            label_list.append('na')
+    scraped_data['labels'] = label_list
+    return scraped_data
