@@ -146,7 +146,7 @@ def evaluate_classifier_model(model_name, model_name_dict):
     pred = best_model.predict(true_vectors)
     best = get_confusion_metrics(val_df.labels, pred)
     grid_search = pull_corresponding_classifier_grid_search(model_name, model_name_dict)
-    return plot_grid_search(grid_search)
+    # return plot_grid_search(grid_search)
 
 def evaluate_classifier_model_hybrid(model_name, model_name_dict, d2v_model, d2v_model_2):
     val_df,true_vectors = infer_vecs_for_val_hybrid(d2v_model, model_name, model_name_dict)
@@ -159,7 +159,7 @@ def evaluate_classifier_model_hybrid(model_name, model_name_dict, d2v_model, d2v
     best = get_confusion_metrics(val_df.labels, pred)
     grid_search = pull_corresponding_classifier_grid_search(model_name, model_name_dict)
     print(pred)
-    return plot_grid_search(grid_search)
+    # return plot_grid_search(grid_search)
 
 
 def plot_grid_search(grid_df):
@@ -220,8 +220,24 @@ def plot_best_grid_search(models, model_name_dict):
     master_df = master_df.reset_index(drop=True)
     master_df.index = master_df.model_name
     show_df = master_df[['mean_train_score','mean_test_score','std_train_score','std_test_score','params']]
+    show_df = show_df.sort_values(by = ['mean_test_score'], ascending = False)
     display(show_df)
-    return plot_grid_search(master_df)
+    return #plot_grid_search(master_df)
+
+def plot_best_grid_search_SVM(models, model_name_dict):
+    master_df = pd.DataFrame()
+    models = ['Bigram_DMC','Trigram_DMM','Trigram_DBOW_DMM','Bigram_DBOW_DMM','Bigram_DBOW_200']
+    for model in models:
+        df = pull_corresponding_classifier_grid_search(model, model_name_dict)
+        df = df[(df.rank_test_score == 1)]
+        df['model_name'] = model
+        master_df = master_df.append(df.head(1), ignore_index=True)
+    master_df = master_df.reset_index(drop=True)
+    master_df.index = master_df.model_name
+    show_df = master_df[['mean_train_score','mean_test_score','std_train_score','std_test_score','params']]
+    show_df = show_df.sort_values(by = ['mean_test_score'], ascending = False)
+    display(show_df)
+    return #plot_grid_search(master_df)
 
 def fix_DT_overfit(models, model_name_dict):
     master_df = pd.DataFrame()
@@ -234,8 +250,33 @@ def fix_DT_overfit(models, model_name_dict):
     master_df = master_df.reset_index(drop=True)
     master_df.index = master_df.model_name
     show_df = master_df[['mean_train_score','mean_test_score','std_train_score','std_test_score','params']]
+    show_df = show_df.sort_values(by = ['mean_test_score'], ascending = False)
     display(show_df)
-    return plot_grid_search(master_df)
+    return #plot_grid_search(master_df)
+
+def fix_RF_overfit(models, model_name_dict):
+    master_df = pd.DataFrame()
+    for model in models:
+        df = pull_corresponding_classifier_grid_search(model, model_name_dict)
+        df = df[(df.param_max_depth < 6)] #remove overfit
+        df['model_name'] = model
+        df = df.sort_values(by=['mean_test_score'],ascending=False)
+        master_df = master_df.append(df.head(1), ignore_index=True)
+    master_df = master_df.reset_index(drop=True)
+    master_df.index = master_df.model_name
+    show_df = master_df[['mean_train_score','mean_test_score','std_train_score','std_test_score','params']]
+    show_df = show_df.sort_values(by = ['mean_test_score'], ascending = False)
+    display(show_df)
+    return #plot_grid_search(master_df)
+
+def plot_feature_importances(model_name, dictionary):
+    model = pull_corresponding_classifier_model(model_name,dictionary)
+    df = pd.DataFrame(model.feature_importances_)
+    plt.figure(figsize=(8,8))
+    plt.barh(df.index, df[0], align='center')
+#     plt.yticks(np.arange(n_features), model.feature_importances_)
+    plt.xlabel("Feature importance")
+    plt.ylabel("Feature")
 
 Logistic_dict = {'Bigram_DBOW': ('Classification_models/Logistic_Regression/best_log_reg_TRIDMC.pkl','Classification_models/Logistic_Regression/logistic_grid_search_full.csv'),
                   'Bigram_DBOW_200':('Classification_models/Logistic_Regression/best_log_reg_DBOW200.pkl','Classification_models/Logistic_Regression/logistic_grid_search_full_DBOW200.csv'),
@@ -278,7 +319,60 @@ Decision_Tree_dict = {'Bigram_DMC': ('Classification_models/Decision_Tree/Decisi
  'Bigram_DBOW': ('Classification_models/Decision_Tree/Decision_Tree_Bigram_DBOW.pkl',
   'Classification_models/Decision_Tree/grid_search_Decision_Tree_Bigram_DBOW.csv')}
 
-all_classifier_dictionaries = [Logistic_dict,Decision_Tree_dict]
+Random_Forest_dict = {'Bigram_DMC': ('Classification_models/Random_Forest/Random_Forest_Bigram_DMC.pkl',
+  'Classification_models/Random_Forest/grid_search_Random_Forest_Bigram_DMC.csv'),
+ 'Trigram_DMM': ('Classification_models/Random_Forest/Random_Forest_Trigram_DMM.pkl',
+  'Classification_models/Random_Forest/grid_search_Random_Forest_Trigram_DMM.csv'),
+ 'Trigram_DBOW_DMM': ('Classification_models/Random_Forest/Random_Forest_Trigram_DBOW_DMM.pkl',
+  'Classification_models/Random_Forest/grid_search_Random_Forest_Trigram_DBOW_DMM.csv'),
+ 'Trigram_DMC': ('Classification_models/Random_Forest/Random_Forest_Trigram_DMC.pkl',
+  'Classification_models/Random_Forest/grid_search_Random_Forest_Trigram_DMC.csv'),
+ 'Bigram_DBOW_DMM': ('Classification_models/Random_Forest/Random_Forest_Bigram_DBOW_DMM.pkl',
+  'Classification_models/Random_Forest/grid_search_Random_Forest_Bigram_DBOW_DMM.csv'),
+ 'Bigram_DBOW_200': ('Classification_models/Random_Forest/Random_Forest_Bigram_DBOW_200.pkl',
+  'Classification_models/Random_Forest/grid_search_Random_Forest_Bigram_DBOW_200.csv'),
+ 'Bigram_DBOW_DMC': ('Classification_models/Random_Forest/Random_Forest_Bigram_DBOW_DMC.pkl',
+  'Classification_models/Random_Forest/grid_search_Random_Forest_Bigram_DBOW_DMC.csv'),
+ 'Bigram_DMM': ('Classification_models/Random_Forest/Random_Forest_Bigram_DMM.pkl',
+  'Classification_models/Random_Forest/grid_search_Random_Forest_Bigram_DMM.csv'),
+ 'Trigram_DBOW': ('Classification_models/Random_Forest/Random_Forest_Trigram_DBOW.pkl',
+  'Classification_models/Random_Forest/grid_search_Random_Forest_Trigram_DBOW.csv'),
+ 'Bigram_DBOW': ('Classification_models/Random_Forest/Random_Forest_Bigram_DBOW.pkl',
+  'Classification_models/Random_Forest/grid_search_Random_Forest_Bigram_DBOW.csv')}
+
+Ada_Boost_dict = {'Bigram_DMC': ('Classification_models/AdaBoost/AdaBoost_Bigram_DMC.pkl',
+  'Classification_models/AdaBoost/grid_search_AdaBoost_Bigram_DMC.csv'),
+ 'Trigram_DMM': ('Classification_models/AdaBoost/AdaBoost_Trigram_DMM.pkl',
+  'Classification_models/AdaBoost/grid_search_AdaBoost_Trigram_DMM.csv'),
+ 'Trigram_DBOW_DMM': ('Classification_models/AdaBoost/AdaBoost_Trigram_DBOW_DMM.pkl',
+  'Classification_models/AdaBoost/grid_search_AdaBoost_Trigram_DBOW_DMM.csv'),
+ 'Trigram_DMC': ('Classification_models/AdaBoost/AdaBoost_Trigram_DMC.pkl',
+  'Classification_models/AdaBoost/grid_search_AdaBoost_Trigram_DMC.csv'),
+ 'Bigram_DBOW_DMM': ('Classification_models/AdaBoost/AdaBoost_Bigram_DBOW_DMM.pkl',
+  'Classification_models/AdaBoost/grid_search_AdaBoost_Bigram_DBOW_DMM.csv'),
+ 'Bigram_DBOW_200': ('Classification_models/AdaBoost/AdaBoost_Bigram_DBOW_200.pkl',
+  'Classification_models/AdaBoost/grid_search_AdaBoost_Bigram_DBOW_200.csv'),
+ 'Bigram_DBOW_DMC': ('Classification_models/AdaBoost/AdaBoost_Bigram_DBOW_DMC.pkl',
+  'Classification_models/AdaBoost/grid_search_AdaBoost_Bigram_DBOW_DMC.csv'),
+ 'Bigram_DMM': ('Classification_models/AdaBoost/AdaBoost_Bigram_DMM.pkl',
+  'Classification_models/AdaBoost/grid_search_AdaBoost_Bigram_DMM.csv'),
+ 'Trigram_DBOW': ('Classification_models/AdaBoost/AdaBoost_Trigram_DBOW.pkl',
+  'Classification_models/AdaBoost/grid_search_AdaBoost_Trigram_DBOW.csv'),
+ 'Bigram_DBOW': ('Classification_models/AdaBoost/AdaBoost_Bigram_DBOW.pkl',
+  'Classification_models/AdaBoost/grid_search_AdaBoost_Bigram_DBOW.csv')}
+
+SVM_dict = {'Bigram_DMC': ('Classification_models/SVM/SVM_Bigram_DMC.pkl',
+  'Classification_models/SVM/grid_search_SVM_Bigram_DMC.csv'),
+ 'Trigram_DMM': ('Classification_models/SVM/SVM_Trigram_DMM.pkl',
+  'Classification_models/SVM/grid_search_SVM_Trigram_DMM.csv'),
+ 'Trigram_DBOW_DMM': ('Classification_models/SVM/SVM_Trigram_DBOW_DMM.pkl',
+  'Classification_models/SVM/grid_search_SVM_Trigram_DBOW_DMM.csv'),
+ 'Bigram_DBOW_DMM': ('Classification_models/SVM/SVM_Bigram_DBOW_DMM.pkl',
+  'Classification_models/SVM/grid_search_SVM_Bigram_DBOW_DMM.csv'),
+ 'Bigram_DBOW_200': ('Classification_models/SVM/SVM_Bigram_DBOW_200.pkl',
+  'Classification_models/SVM/grid_search_SVM_Bigram_DBOW_200.csv')}
+
+all_classifier_dictionaries = [Logistic_dict,Decision_Tree_dict, Random_Forest_dict,Ada_Boost_dict, SVM_dict]
 
 models = ['Bigram_DMC',
  'Trigram_DMM',
