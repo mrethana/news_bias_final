@@ -147,6 +147,21 @@ def evaluate_classifier_model(model_name, model_name_dict):
     best = get_confusion_metrics(val_df.labels, pred)
     grid_search = pull_corresponding_classifier_grid_search(model_name, model_name_dict)
     # return plot_grid_search(grid_search)
+def evaluate_classifier_model_NB(model_name, model_name_dict):
+    d2v_model = model_name_match[model_name]
+    if type(d2v_model) == tuple:
+        val_df,true_vectors = infer_vecs_for_val_hybrid(d2v_model[0],d2v_model[1], model_name_dict)
+    else:
+        val_df,true_vectors = infer_vecs_for_val(d2v_model, model_name, model_name_dict)
+    best_model = pull_corresponding_classifier_model(model_name, model_name_dict)
+    print(model_name)
+    print('Best Model Parameters')
+    display(best_model)
+    true_vectors  = true_vectors + 1
+    print('Validation Test Score: ' +str(round(best_model.score(true_vectors, val_df.labels),2)))
+    pred = best_model.predict(true_vectors)
+    best = get_confusion_metrics(val_df.labels, pred)
+    grid_search = pull_corresponding_classifier_grid_search(model_name, model_name_dict)
 
 def evaluate_classifier_model_hybrid(model_name, model_name_dict, d2v_model, d2v_model_2):
     val_df,true_vectors = infer_vecs_for_val_hybrid(d2v_model, model_name, model_name_dict)
@@ -372,6 +387,29 @@ SVM_dict = {'Bigram_DMC': ('Classification_models/SVM/SVM_Bigram_DMC.pkl',
  'Bigram_DBOW_200': ('Classification_models/SVM/SVM_Bigram_DBOW_200.pkl',
   'Classification_models/SVM/grid_search_SVM_Bigram_DBOW_200.csv')}
 
+NB_dict = {'Bigram_DMC': ('Classification_models/Naive_Bayes/Naive_Bayes_Bigram_DMC.pkl',
+  'Classification_models/Naive_Bayes/grid_search_Naive_Bayes_Bigram_DMC.csv'),
+ 'Trigram_DMM': ('Classification_models/Naive_Bayes/Naive_Bayes_Trigram_DMM.pkl',
+  'Classification_models/Naive_Bayes/grid_search_Naive_Bayes_Trigram_DMM.csv'),
+ 'Trigram_DBOW_DMM': ('Classification_models/Naive_Bayes/Naive_Bayes_Trigram_DBOW_DMM.pkl',
+  'Classification_models/Naive_Bayes/grid_search_Naive_Bayes_Trigram_DBOW_DMM.csv'),
+ 'Trigram_DMC': ('Classification_models/Naive_Bayes/Naive_Bayes_Trigram_DMC.pkl',
+  'Classification_models/Naive_Bayes/grid_search_Naive_Bayes_Trigram_DMC.csv'),
+ 'Bigram_DBOW_DMM': ('Classification_models/Naive_Bayes/Naive_Bayes_Bigram_DBOW_DMM.pkl',
+  'Classification_models/Naive_Bayes/grid_search_Naive_Bayes_Bigram_DBOW_DMM.csv'),
+ 'Bigram_DBOW_200': ('Classification_models/Naive_Bayes/Naive_Bayes_Bigram_DBOW_200.pkl',
+  'Classification_models/Naive_Bayes/grid_search_Naive_Bayes_Bigram_DBOW_200.csv'),
+ 'Bigram_DBOW_DMC': ('Classification_models/Naive_Bayes/Naive_Bayes_Bigram_DBOW_DMC.pkl',
+  'Classification_models/Naive_Bayes/grid_search_Naive_Bayes_Bigram_DBOW_DMC.csv'),
+ 'Bigram_DMM': ('Classification_models/Naive_Bayes/Naive_Bayes_Bigram_DMM.pkl',
+  'Classification_models/Naive_Bayes/grid_search_Naive_Bayes_Bigram_DMM.csv'),
+ 'Trigram_DBOW': ('Classification_models/Naive_Bayes/Naive_Bayes_Trigram_DBOW.pkl',
+  'Classification_models/Naive_Bayes/grid_search_Naive_Bayes_Trigram_DBOW.csv'),
+ 'Bigram_DBOW': ('Classification_models/Naive_Bayes/Naive_Bayes_Bigram_DBOW.pkl',
+  'Classification_models/Naive_Bayes/grid_search_Naive_Bayes_Bigram_DBOW.csv')}
+
+
+
 all_classifier_dictionaries = [Logistic_dict,Decision_Tree_dict, Random_Forest_dict,Ada_Boost_dict, SVM_dict]
 
 models = ['Bigram_DMC',
@@ -415,3 +453,83 @@ def train_learning_model(learning_model,hyperparameters,all_d2v_models,classifie
         path_dictionary[d2v_model] = (best_model_path,grid_df_path)
         print('Saved Grid Search!')
     return path_dictionary
+
+def train_learning_model_NB(learning_model,hyperparameters,all_d2v_models,classifier_string):
+    path_dictionary = {}
+    for d2v_model in all_d2v_models:
+        print('Training '+ d2v_model)
+        X_resampled, y_resampled = resampled_SMOTE(d2v_model)
+        learning_model = learning_model
+        clf = GridSearchCVProgressBar(learning_model, hyperparameters, cv=10, verbose=0)
+        X_resampled = X_resampled + 1
+        best_model = clf.fit(X_resampled,y_resampled)
+        grid_df = pd.DataFrame(best_model.cv_results_)
+        best_model_path = '../Classification_models/'+classifier_string+'/'+classifier_string+'_'+d2v_model+'.pkl'
+        grid_df_path = '../Classification_models/'+classifier_string+'/'+'grid_search_'+classifier_string+'_'+d2v_model+'.csv'
+        grid_df.to_csv(grid_df_path)
+        joblib.dump(best_model.best_estimator_,best_model_path)
+        print('Saved Model!')
+        path_dictionary[d2v_model] = (best_model_path,grid_df_path)
+        print('Saved Grid Search!')
+    return path_dictionary
+
+def train_learning_model_NB(learning_model,hyperparameters,X,y, classifier_string): #TFIDF FOR FACT OR OPINION
+    path_dictionary = {}
+    learning_model = learning_model
+    clf = GridSearchCVProgressBar(learning_model, hyperparameters, cv=10, verbose=0)
+    best_model = clf.fit(X,y)
+    grid_df = pd.DataFrame(best_model.cv_results_)
+    best_model_path = '../Classification_models/'+classifier_string+'/'+classifier_string+'_'+'.pkl'
+    grid_df_path = '../Classification_models/'+classifier_string+'/'+'grid_search_'+classifier_string+'_'+'.csv'
+    grid_df.to_csv(grid_df_path)
+    joblib.dump(best_model.best_estimator_,best_model_path)
+    print('Saved Model!')
+    path_dictionary = (best_model_path,grid_df_path)
+    print('Saved Grid Search!')
+    return path_dictionary
+
+def architecture(shape):
+    model = Sequential()
+    model.add(Dense(10, input_dim=shape, activation='relu'))
+    model.add(Dropout(0.5))
+    model.add(Dense(10, activation='relu'))
+    model.add(Dropout(0.4))
+#     model.add(Dense(25, activation='relu'))
+#     model.add(Dropout(0.4))
+    model.add(Dense(3, activation='softmax'))
+
+    #stochastic gradient descent
+    sgd = optimizers.SGD(lr=0.0001, decay=0.00001)#, momentum=0.9)
+    model.compile(optimizer= "Adam" ,loss='mse',metrics=['accuracy','mse'])
+#     model.compile(loss='categorical_crossentropy', optimizer = sgd, metrics=['accuracy','mse'])
+    return model
+
+def train_MLPS(models, epochs, batch):
+    for model in models:
+        X_resampled, y_resampled = resampled_SMOTE(model)
+        encoder = LabelBinarizer()
+        val = X_resampled[:500]
+        Y = encoder.fit_transform(y_resampled)
+        label_val = Y[:500]
+        Y = Y[500:]
+        X_resampled = X_resampled[500:]
+        dim = np.shape(X_resampled)[1]
+        print(dim)
+        perceptron = architecture(dim)
+        model = perceptron.fit(X_resampled,Y, epochs=epochs, batch_size=batch,validation_data=(val, label_val))
+#         model.save_weights(model+"_model.h5")
+#         print("Saved model to disk")
+        model_dict = model.history
+        plt.clf()
+
+        acc_values = model_dict['acc']
+        val_acc_values = model_dict['val_acc']
+
+        epochs = range(1, len(acc_values) + 1)
+        plt.plot(epochs, acc_values, 'g', label='Training acc')
+        plt.plot(epochs, val_acc_values, 'g.', label='Validation acc')
+        plt.title('Training & validation accuracy Multi Layered Perceptron')
+        plt.xlabel('Epochs')
+        plt.ylabel('Loss')
+        plt.legend()
+        plt.show()
