@@ -11,6 +11,9 @@ from nltk.tokenize import sent_tokenize, word_tokenize
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
 from nltk.tokenize import RegexpTokenizer
+from sklearn.decomposition import PCA
+
+master_df = pd.read_csv('Archive_CSV/final_df_forreg.csv',index_col=0)
 
 def everything(source_code, page):
         article_results_rel = newsapi.get_everything(language='en',sort_by='popularity', page_size=100, sources=source_code, page=page)
@@ -124,16 +127,62 @@ def word_cloud(source_name,subjectivity_floor):
     plt.axis("off")
     plt.show()
 
-def box_plots(data, metric, title, sources_toshow_int):
+def box_plots(metric, title, sources_toshow_int):
     plot_data = []
-    for source in (list(df.source_name.value_counts().index))[:sources_toshow_int]:
-        plot_data.append(data[metric][(data.source_name == source)])
+    for source in (list(master_df.source_name.value_counts().index))[:sources_toshow_int]:
+        plot_data.append(master_df[metric][(master_df.source_name == source)])
     fig, ax = plt.subplots()
     fig.set_size_inches(40, 20)
     ax.set_title("Distribution of Outlet's article "+title, fontsize=40)
     c = 'blue'
     ax.boxplot(plot_data)
-    ax.set_xticklabels((list(df.source_name.value_counts().index))[:sources_toshow_int])
+    ax.set_xticklabels((list(master_df.source_name.value_counts().index))[:sources_toshow_int])
     plt.xticks(fontsize=20, rotation=90)
     plt.yticks(fontsize=20)
     plt.show()
+
+def plot_metrics_vs_topics(metric, title, sources_toshow_int, subject):
+    plot_data = []
+    for source in (list(master_df.source_name.value_counts().index))[:sources_toshow_int]:
+        plot_data.append(master_df[metric][(master_df.source_name == source) & ((master_df.main_subject == subject)|(master_df.sub_topic == subject))])
+    fig, ax = plt.subplots()
+    fig.set_size_inches(40, 20)
+    ax.set_title("Distribution of Outlet's article "+title + ' for Topic of '+subject, fontsize=40)
+    c = 'blue'
+    ax.boxplot(plot_data)
+    ax.set_xticklabels((list(master_df.source_name.value_counts().index))[:sources_toshow_int])
+    plt.xticks(fontsize=20, rotation=90)
+    plt.yticks(fontsize=20)
+    plt.show()
+
+def normalize_column(dataframe, column):
+    normalized_column=(dataframe[column]-dataframe[column].mean())/dataframe[column].std()
+    return normalized_column
+
+#visualize PCA on Word Vectors
+# vectorized_topics = pd.read_csv('../Archive_CSV/vectorized_topics.csv',index_col=0)
+# subjects = df.main_subject.value_counts()[1:200]
+# adjust_vecs = vectorized_topics[(vectorized_topics.index.isin(list(subjects.index)))]
+#
+# X = adjust_vecs
+# pca = PCA(n_components=172)
+# result = pca.fit_transform(X)
+# # create a scatter plot of the projection
+# fig, ax = plt.subplots()
+# fig.set_size_inches(40, 20)
+# ax.scatter(result[:, 0], result[:, 1])
+# words = list(adjust_vecs.index)
+# for i, word in enumerate(words):
+#     text = ax.annotate(word, xy=(result[i, 0], result[i, 1]))
+#     text.set_fontsize(20)
+# x_values = range(1, pca.n_components_+1)
+# ratio = pca.explained_variance_ratio_
+# def plot_explained_variance(total_features,exp_variance_ratio):
+#     fig, ax = plt.subplots(figsize=(8,6))
+#     ax.plot(total_features, exp_variance_ratio, lw=2, label='explained variance')
+#     ax.plot(total_features, np.cumsum(exp_variance_ratio), lw=2, label='cumulative explained variance')
+#     ax.set_title('Doc2vec: explained variance of components')
+#     ax.set_xlabel('principal component')
+#     ax.set_ylabel('explained variance')
+#     plt.show()
+# plot_explained_variance(x_values,ratio)
