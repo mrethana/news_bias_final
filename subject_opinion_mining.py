@@ -6,6 +6,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 import nltk
+import collections
 from nltk.corpus import stopwords
 from nltk.tokenize import sent_tokenize, word_tokenize
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
@@ -13,15 +14,37 @@ from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
 from nltk.tokenize import RegexpTokenizer
 from textblob import TextBlob
 from nltk.corpus import stopwords
-import re
 nltk.download('maxent_ne_chunker')
 from nltk.tree import Tree
 nltk.download('maxent_ne_chunker')
 nltk.download('words')
+from gensim.models import KeyedVectors
 
 NOUNS = ['NN', 'NNS', 'NNP', 'NNPS']
 VERBS = ['VB', 'VBG', 'VBD', 'VBN', 'VBP', 'VBZ']
 stopwords= set(stopwords.words('english'))
+# # load the google word2vec model
+# filename = 'Google_w2v/GoogleNews-vectors-negative300.bin'
+# modelG = KeyedVectors.load_word2vec_format(filename, binary=True)
+
+# from nltk import DefaultTagger, UnigramTagger, BigramTagger, TrigramTagger
+# nltk.download('conll2000')
+# nltk.download('treebank')
+# train_sents = nltk.corpus.brown.tagged_sents()
+# train_sents += nltk.corpus.conll2000.tagged_sents()
+# train_sents += nltk.corpus.treebank.tagged_sents()
+# # Create instance of SubjectTrigramTagger
+# t0 = DefaultTagger('NN')
+# t1 = UnigramTagger(train_sents, backoff=t0)
+# t2 = BigramTagger(train_sents, backoff=t1)
+# trigram_tagger = TrigramTagger(train_sents, backoff=t2)
+
+
+def clean_document_w_stop_words(document):
+    document = re.sub('[^A-Za-z .-]+', ' ', document)
+    document = ' '.join(document.split())
+    document = ' '.join([i for i in document.split()])
+    return document
 
 def clean_document(document):
     document = re.sub('[^A-Za-z .-]+', ' ', document)
@@ -81,3 +104,93 @@ def pull_all_subjects(corpus_text):
         counter +=1
         print(counter)
     return main_subject, subject_two
+
+def create_word2vec_embeddings(data_frame):
+    list_topics = []
+    all_vectors = []
+    main = list(data_frame.main_subject)
+    second = list(data_frame.sub_topic)
+    main.extend(second)
+    all_topics = list(set(main))
+    for topic in all_topics:
+        try:
+            if type(modelG.vocab[topic]) == gensim.models.keyedvectors.Vocab:
+                vector = modelG.get_vector(topic)
+                kv_pair = {topic:vector}
+                list_topics.append(topic)
+                all_vectors.append(vector)
+                print('Vectorized '+topic)
+        except KeyError:
+            print(topic+' not in Google Vocab')
+            continue
+    return pd.DataFrame(all_vectors,index=list_topics)
+
+def mine_objective_articles(corpus):
+    counter = 0
+    all_text = []
+    OPINION_LEANING = ['PDT', 'RBR', 'RBS','JJR','JJS'] #predeterminer, comparative adverb, superlative adverb, comparative and superlative adjectives
+    for doc in corpus:
+        new_doc = []
+        clean_doc = clean_document_w_stop_words(doc)
+        token_sent = tokenize_sentences(clean_doc)
+        tagged_sents = tag_parts_of_sentences(token_sent)
+        for tagged_sent in tagged_sents:
+            for tuple in tagged_sent:
+                pos_all = [tuple[1] for tuple in tagged_sent if tuple[1] in OPINION_LEANING]
+            if len(pos_all) == 0:
+                approved_sentence = [tuple[0] for tuple in tagged_sent]
+                new_doc.extend(approved_sentence)
+            else:
+                pass
+        if len(new_doc) > 2:
+            final_text = ' '.join(new_doc)
+            all_text.append(final_text)
+        counter +=1
+        print(counter)
+    return all_text
+def mine_opinions(corpus):
+    counter = 0
+    all_text = []
+    OPINION_LEANING = ['PDT', 'RBR', 'RBS','JJR','JJS'] #predeterminer, comparative adverb, superlative adverb, comparative and superlative adjectives
+    for doc in corpus:
+        new_doc = []
+        clean_doc = clean_document_w_stop_words(doc)
+        token_sent = tokenize_sentences(clean_doc)
+        tagged_sents = tag_parts_of_sentences(token_sent)
+        for tagged_sent in tagged_sents:
+            for tuple in tagged_sent:
+                pos_all = [tuple[1] for tuple in tagged_sent if tuple[1] in OPINION_LEANING]
+            if len(pos_all) > 0:
+                approved_sentence = [tuple[0] for tuple in tagged_sent]
+                new_doc.extend(approved_sentence)
+            else:
+                pass
+        if len(new_doc) > 2:
+            final_text = ' '.join(new_doc)
+            all_text.append(final_text)
+        counter +=1
+        print(counter)
+    return all_text
+
+def tag_relevant_sentences(subject, clean_document):
+    sentences = tokenize_sentences(clean_document)
+    sentences = [sentence for sentence in sentences if subject in
+                [word for word in sentence]]
+    tagged_sents = [trigram_tagger.tag(sent) for sent in sentences]
+    return tagged_sents
+
+def get_svo(sentence, subject):
+    subject_idx = next((i for i, v in enumerate(sentence)
+                    if v[0] == subject), None)
+    data = {'subject': subject}
+    for i in range(subject_idx, len(sentence)):
+        found_action = False
+        for j, (token, tag) in enumerate(sentence[i+1:]):
+            if tag in VERBS:
+                data['action'] = token
+                found_action = True
+            if tag in NOUNS and found_action == True:
+                data['object'] = token
+                data['phrase'] = sentence[i: i+j+2]
+                return data
+    return {}
