@@ -173,7 +173,7 @@ def search_news(parameter):
         #temporary fillers
         sample_size = len(list(df.medium))
         random_article_lengths = np.random.randint(1,20,size=sample_size)
-        df['length'] = random_article_lengths
+        df['length'] = random_article_lengths #ADD WPM 200 WPM AVG
         df.to_csv('Archive_CSV/current_search.csv')
         time.sleep(5)
         print('Data Loaded!')
