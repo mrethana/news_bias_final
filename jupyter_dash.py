@@ -12,6 +12,7 @@ from IPython.display import Image
 from model_evaluation import *
 from d2v_func import *
 from pca_func import *
+from feat_engineering import *
 
 
 sources_list = ['abc-news',
@@ -167,25 +168,27 @@ def search_news(parameter):
         df = df.drop('source',axis =1)
         df['medium'] = 'text'
         df = df_all_articles(df)
-        df['label'] = cluster_data('Trigram_DBOW', df, 100)
+        df = add_article_words_length(df)
+        opinions_df = pd.read_csv('Archive_CSV/opinion_classifier.csv',index_col = 0)
+        df = add_fact_metrics(opinions_df, df)
+        df['label']= cluster_data('Trigram_DBOW', df, 100)
         df = df.append(video_df, ignore_index=True)
         df = df.append(audio_df, ignore_index=True)
         #temporary fillers
-        sample_size = len(list(df.medium))
-        random_article_lengths = np.random.randint(1,20,size=sample_size)
-        df['length'] = random_article_lengths #ADD WPM 200 WPM AVG
-        df.to_csv('Archive_CSV/current_search.csv')
+        df = df.fillna(df.mean())
+        param = parameter.replace(" ", "_")
+        df.to_csv('Archive_CSV/'+param+'current_search.csv')
         time.sleep(5)
         print('Data Loaded!')
 #         time.sleep(1800)
     else:
         print('Enter Search Parameter')
 
-def pull_content(Length, Perspective, Limit, Medium):
-    df = pd.read_csv('Archive_CSV/current_search.csv', index_col=0)
+def pull_content(Length, Perspective, Limit, Medium,topic_string):
+    df = pd.read_csv('Archive_CSV/'+topic_string+'current_search.csv', index_col=0)
     df = df.dropna()
     if Medium == 'Text':
-        df2 = df[(df.length > Length[0]) & (df.length < Length[1]) & (df.label == Perspective) & (df.medium == 'text')]
+        df2 = df[(df.article_length_minutes > Length[0]) & (df.article_length_minutes < Length[1]) & (df.label == Perspective) & (df.medium == 'text')]
         df2 = df2.sort_values(['publishedAt'],ascending=False)
         list_tuples = []
         for i in range (0, Limit):
@@ -196,7 +199,7 @@ def pull_content(Length, Perspective, Limit, Medium):
             display(HTML("<a href="+link+">"+source_name+': '+title+"</a>"))
             display(Image(url= image))
     elif Medium == 'Video':
-        df2 = df[(df.length > Length[0]) & (df.length < Length[1]) & (df.label == Perspective) & (df.medium == 'video')]
+        df2 = df[(df.article_length_minutes > Length[0]) & (df.article_length_minutes < Length[1]) & (df.label == Perspective) & (df.medium == 'video')]
         list_tuples = []
         for i in range (0, Limit):
             title = list(df2.title)[i]
@@ -206,7 +209,7 @@ def pull_content(Length, Perspective, Limit, Medium):
             display(HTML("<a href="+link+">"+source_name+': '+title+"</a>"))
             display(HTML('<iframe width="560" height="315" src="https://www.youtube.com/embed/'+link+'?rel=0&amp;controls=0&amp;showinfo=0" frameborder="0" allowfullscreen></iframe>'))
     else:
-        df2 = df[(df.length > Length[0]) & (df.length < Length[1]) & (df.label == Perspective) & (df.medium == 'audio')]
+        df2 = df[(df.article_length_minutes > Length[0]) & (df.article_length_minutes< Length[1]) & (df.label == Perspective) & (df.medium == 'audio')]
         list_tuples = []
         if len(list(df2.index)) < 1:
             print('No Audio')
@@ -239,9 +242,10 @@ def df_all_articles(articles_df):
 
 def cluster_data(model_name, scraped_data, size):
     Trigram_DBOW = Doc2Vec.load("D2V_models/TRI_d2v_dbow100.model")
-    best_model = pull_corresponding_logreg_model(model_name)
+    best_model = pull_corresponding_classifier_model(model_name, RF_fixed)
     vecs = pd.DataFrame(infer_vectors(Trigram_DBOW,list(scraped_data.text.astype(str)), size))
     pred = best_model.predict(vecs[vecs.columns[0:size]])
+    # pred_probs = best_model.predict_proba(vecs[vecs.columns[0:size]])
     return pred
 
 def label_scraped_data(label_dict,scraped_data):
