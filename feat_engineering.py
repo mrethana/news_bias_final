@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.externals import joblib
 from sklearn.feature_extraction.text import TfidfVectorizer
+from subject_opinion_mining import *
 
 def add_w2v_clusters_main(word_df, all_data):
     main_clust = []
@@ -41,7 +42,7 @@ def predict_fact_opinion(opinions_df, text_to_predict_list):
     vectorizer = TfidfVectorizer()
     text = list(opinions_df['0'])
     X_data = vectorizer.fit_transform(text)
-    model = joblib.load(open('../Classification_models/Opinion/Opinion_.pkl', 'rb'))
+    model = joblib.load(open('Classification_models/Opinion/Opinion_.pkl', 'rb'))
     all_text = vectorizer.transform(text_to_predict_list)
     all_predictions = []
     for doc in all_text:
@@ -62,11 +63,12 @@ def assign_percent_fact(pred_array):
     count = collections.Counter(pred_array)
     op = count['opinion']
     fact = count['factual']
-    return op, fact, percent_opinion
+    return op, fact
 
 def add_article_words_length(dataframe):
     all_word_total = []
     all_article_length = []
+    dataframe.text = dataframe.text.astype(str)
     for index, row in dataframe.iterrows():
         words = len(row.text)
         length = round(words/200,0)
@@ -84,13 +86,17 @@ def add_fact_metrics(opinions_df, full_df):
     all_percentages = []
     counter = 1
     for text in full_df.text:
-        full_sentences = clean_each_sentence(text)
-        preds_array = predict_fact_opinion(opinions_df,full_sentences)
-        op, fact, percent_opinion = assign_percent_fact(preds_array)
-        all_opinions.append(op)
-        all_facts.append(fact)
-        all_percentages.append(percent_opinion)
-        counter += 1
+        if len(text) > 1:
+            full_sentences = clean_each_sentence(text)
+            preds_array = predict_fact_opinion(opinions_df,full_sentences)
+            op, fact = assign_percent_fact(preds_array)
+            all_opinions.append(op)
+            all_facts.append(fact)
+            counter += 1
+        else:
+            all_opinions.append(2)
+            all_facts.append(98)
+            counter += 1
         print('Added'+str(counter))
     full_df['total_factual'] = all_facts
     full_df['total_opinions'] = all_opinions
