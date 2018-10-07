@@ -148,10 +148,74 @@ def pull_articles(parameter):
     article_results_opp = article_results_opp['articles']
     return article_results_opp + article_results_rel
 
+def clean_articles(parameter):
+    consolidated = pull_articles(parameter)
+    split_source_info(consolidated)
+    df = pd.DataFrame(consolidated)
+    df = df.drop('source',axis =1)
+    df['medium'] = 'text'
+    return df
 
-def search_news(parameter):
+def quick_audio(paramter):
+    audio_df = pd.DataFrame(pull_pods(parameter))
+    audio_df['label'] = np.random.choice(['right','left','center'], len(list(audio_df.index)), replace=True)
+    video_df = pd.DataFrame(pull_videos(parameter))
+
+def quick_search(parameter):
     if len(parameter) > 0:
-        time.sleep(5)
+        print('Aggregating...')
+        print('Scraping Articles...')
+        df = clean_articles(parameter)
+        print('Scraping podcasts...')
+        audio_df = pd.DataFrame(pull_pods(parameter))
+        print('Scraping Videos...')
+        video_df = pd.DataFrame(pull_videos(parameter))
+        print('Print merging data....')
+        df = df.append(video_df, ignore_index=True)
+        df = df.append(audio_df, ignore_index=True)
+        df.to_csv('Archive_CSV/current_search.csv')
+        print('Data Loaded!')
+def update_search():
+    df = pd.read_csv('Archive_CSV/current_search.csv', index_col=0)
+    return df
+def quick_pull_content(Limit, Medium):
+    df = update_search()
+    df = df.dropna()
+    if Medium == 'Text':
+        df2 = df[(df.medium == 'text')]
+        df2 = df2.sort_values(['publishedAt'],ascending=False)
+        list_tuples = []
+        for i in range (0, Limit):
+            title = list(df2.title)[i]
+            link = list(df2.url)[i]
+            image = list(df2.urlToImage)[i]
+            source_name = list(df2.source_name)[i]
+            display(HTML("<a href="+link+">"+source_name+': '+title+"</a>"))
+            display(Image(url= image))
+    elif Medium == 'Video':
+        df2 = df[(df.medium == 'video')]
+        list_tuples = []
+        for i in range (0, Limit):
+            title = list(df2.title)[i]
+            link = list(df2.url)[i]
+            link = link[-11:]
+            source_name = list(df2.source_name)[i]
+            display(HTML("<a href="+link+">"+source_name+': '+title+"</a>"))
+            display(HTML('<iframe width="560" height="315" src="https://www.youtube.com/embed/'+link+'?rel=0&amp;controls=0&amp;showinfo=0" frameborder="0" allowfullscreen></iframe>'))
+    else:
+        df2 = df[(df.medium == 'audio')]
+        list_tuples = []
+        if len(list(df2.index)) < 1:
+            print('No Audio')
+        else:
+            for i in range (0, Limit):
+                link = list(df2.url)[i]
+                display(HTML("<iframe src="+"'"+link+"'"+ "style='width:100%; height:100px;' scrolling='no' frameborder='no'></iframe>"))
+
+
+
+def search_news(parameter, follow_order):
+    if len(parameter) > 0:
         print('Aggregating...')
         print('Pulling videos...')
         video_df = pd.DataFrame(pull_videos(parameter))
@@ -176,16 +240,12 @@ def search_news(parameter):
         df = df.append(audio_df, ignore_index=True)
         #temporary fillers
         df = df.fillna(df.mean())
-        param = parameter.replace(" ", "_")
-        df.to_csv('Archive_CSV/'+param+'current_search.csv')
+        df.to_csv('Archive_CSV/'+str(follow_order)+'current_search.csv')
         time.sleep(5)
         print('Data Loaded!')
-#         time.sleep(1800)
-    else:
-        print('Enter Search Parameter')
 
-def pull_content(Length, Perspective, Limit, Medium,topic_string):
-    df = pd.read_csv('Archive_CSV/'+topic_string+'current_search.csv', index_col=0)
+def pull_content(Length, Perspective, Limit, Medium,follow_order):
+    df = pd.read_csv('Archive_CSV/'+str(follow_order)+'current_search.csv', index_col=0)
     df = df.dropna()
     if Medium == 'Text':
         df2 = df[(df.article_length_minutes > Length[0]) & (df.article_length_minutes < Length[1]) & (df.label == Perspective) & (df.medium == 'text')]
