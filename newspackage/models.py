@@ -1,4 +1,5 @@
-from newspackage import db
+from __init__ import db
+# from newspackage import db
 
 class Content(db.Model):
     __tablename__ = 'content'

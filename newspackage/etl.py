@@ -1,4 +1,5 @@
-from newspackage.apikeys import *
+# from newspackage.apikeys import *
+from apikeys import *
 import pafy
 import requests
 import re
@@ -6,6 +7,9 @@ import numpy as np
 import time
 from bs4 import BeautifulSoup
 import pandas as pd
+from IPython.core.display import HTML, Image
+# from PIL import Image
+from models import *
 
 sources_list = ['abc-news',
  'associated-press',
@@ -165,36 +169,28 @@ def quick_search(parameter):
         # df.to_csv('Archive_CSV/current_search.csv')
         # print('Data Loaded!')
 
-def pull_content(Length, Perspective, Limit, Medium,follow_order):
-    df = pd.read_csv('Archive_CSV/'+str(follow_order)+'current_search.csv', index_col=0)
-    df = df.dropna()
-    if Medium == 'Text':
-        df2 = df[(df.article_length_minutes > Length[0]) & (df.article_length_minutes < Length[1]) & (df.label == Perspective) & (df.medium == 'text')]
-        df2 = df2.sort_values(['publishedAt'],ascending=False)
-        list_tuples = []
-        for i in range (0, Limit):
-            title = list(df2.title)[i]
-            link = list(df2.url)[i]
-            image = list(df2.urlToImage)[i]
-            source_name = list(df2.source_name)[i]
-            display(HTML("<a href="+link+">"+source_name+': '+title+"</a>"))
-            display(Image(url= image))
-    elif Medium == 'Video':
-        df2 = df[(df.article_length_minutes > Length[0]) & (df.article_length_minutes < Length[1]) & (df.label == Perspective) & (df.medium == 'video')]
-        list_tuples = []
-        for i in range (0, Limit):
-            title = list(df2.title)[i]
-            link = list(df2.url)[i]
-            link = link[-11:]
-            source_name = list(df2.source_name)[i]
-            display(HTML("<a href="+link+">"+source_name+': '+title+"</a>"))
-            display(HTML('<iframe width="560" height="315" src="https://www.youtube.com/embed/'+link+'?rel=0&amp;controls=0&amp;showinfo=0" frameborder="0" allowfullscreen></iframe>'))
+def query_content(Limit, Medium, search_param):
+    all_objects = [content for content in Content.query.all() if content.medium.name == Medium if content.search_param == search_param]
+    if len(all_objects) < 1:
+        print('No Content')
     else:
-        df2 = df[(df.article_length_minutes > Length[0]) & (df.article_length_minutes< Length[1]) & (df.label == Perspective) & (df.medium == 'audio')]
-        list_tuples = []
-        if len(list(df2.index)) < 1:
-            print('No Audio')
+        if Medium == 'text':
+            for i in range (0, Limit):
+                title = all_objects[i].title
+                link = all_objects[i].content_url
+                image = all_objects[i].image_url
+                source_name = all_objects[i].provider.provider_name
+                display(HTML("<a href="+link+">"+source_name+': '+title+"</a>"))
+                display(Image(url = image))
+        elif Medium == 'video':
+            for i in range (0, Limit):
+                title = all_objects[i].title
+                link = all_objects[i].content_url
+                link = link[-11:]
+                source_name = all_objects[i].provider.provider_name
+                display(HTML("<a href="+link+">"+source_name+': '+title+"</a>"))
+                display(HTML('<iframe width="560" height="315" src="https://www.youtube.com/embed/'+link+'?rel=0&amp;controls=0&amp;showinfo=0" frameborder="0" allowfullscreen></iframe>'))
         else:
             for i in range (0, Limit):
-                link = list(df2.url)[i]
+                link = all_objects[i].content_url
                 display(HTML("<iframe src="+"'"+link+"'"+ "style='width:100%; height:100px;' scrolling='no' frameborder='no'></iframe>"))

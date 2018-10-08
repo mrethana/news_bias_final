@@ -33,6 +33,6 @@ db=SQLAlchemy(server)
 
 app = dash.Dash(__name__, server = server, url_base_pathname = '/dashboard')
 
-from newspackage.dashboard import *
+# from newspackage.dashboard import *
 # from newspackage.models import *
-from newspackage.seed import *
+# from newspackage.seed import *
