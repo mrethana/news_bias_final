@@ -156,10 +156,10 @@ def clean_articles(parameter):
     df['medium'] = 'text'
     return df
 
-def quick_audio(paramter):
-    audio_df = pd.DataFrame(pull_pods(parameter))
-    audio_df['label'] = np.random.choice(['right','left','center'], len(list(audio_df.index)), replace=True)
-    video_df = pd.DataFrame(pull_videos(parameter))
+# def quick_audio(paramter):
+#     audio_df = pd.DataFrame(pull_pods(parameter))
+#     audio_df['label'] = np.random.choice(['right','left','center'], len(list(audio_df.index)), replace=True)
+#     video_df = pd.DataFrame(pull_videos(parameter))
 
 def quick_search(parameter):
     if len(parameter) > 0:
