@@ -13,7 +13,7 @@ class Content(db.Model):
     medium = db.relationship('Medium', back_populates = 'content')
     provider_id = db.Column(db.Integer, db.ForeignKey('providers.id'))
     provider = db.relationship('Provider', back_populates = 'content')
-    search_param = db.Column(db.VARCHAR())
+    search_param = db.Column(db.VARCHAR(100))
 
 class Provider(db.Model):
     __tablename__ = 'providers'

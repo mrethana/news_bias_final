@@ -1,5 +1,5 @@
 # from newspackage.apikeys import *
-
+from models import *
 from apikeys import *
 
 import pafy
@@ -123,11 +123,14 @@ def pull_videos(parameter):
     videos = soup.findAll('a')
     videos = videos[40:]
     for video in videos:
-        if video.get('href')[:9] == '/watch?v=':
-            url = "https://www.youtube.com" + video.get('href')
-            video = pafy.new(url)
-            data = {'author':video.author, 'content':video.category,'description':video.description,'publishedAt':video.published, 'source_id':video.username, 'source_name':video.author,'title':video.title,'url':url,'urlToImage':video.thumb, 'medium':'video'}
-            list_dicts.append(data)
+        try:
+            if video.get('href')[:9] == '/watch?v=':
+                url = "https://www.youtube.com" + video.get('href')
+                video = pafy.new(url)
+                data = {'author':video.author, 'content':video.category,'description':video.description,'publishedAt':video.published, 'source_id':video.username, 'source_name':video.author,'title':video.title,'url':url,'urlToImage':video.thumb, 'medium':'video'}
+                list_dicts.append(data)
+        except Exception:
+            pass
     return list_dicts
 
 def pull_pods(parameter):

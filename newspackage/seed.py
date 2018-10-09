@@ -67,125 +67,144 @@ def add_content_objects():
         db.session.add(content)
         db.session.commit()
 
-print('Kavanaugh search...')
-bk = quick_search('Brett Kavanaugh')
-find_or_create_content(bk)
-add_medium_objects()
-add_provider_objects()
-add_content_objects()
-new_medium_objects = []
-new_provider_objects = []
-new_content_objects = []
+# print('Blockchain search...')
+# bchain = quick_search('blockchain')
+# find_or_create_content(bchain)
+# print('AI search...')
+# ai = quick_search('artificial intelligence')
+# find_or_create_content(ai)
+# print('Quantum Search...')
+# qc = quick_search('quantum computing')
+# find_or_create_content(qc)
+# print('Funding Search...')
+# fund = quick_search('startup funding')
+# find_or_create_content(fund)
 
-print('Election search...')
-elec = quick_search('election')
-find_or_create_content(elec)
-add_medium_objects()
-add_provider_objects()
-add_content_objects()
-new_medium_objects = []
-new_provider_objects = []
-new_content_objects = []
+# add_medium_objects()
+# add_provider_objects()
+# add_content_objects()
 
-print('Trump Search...')
-dt = quick_search('Donald Trump')
-find_or_create_content(dt)
-add_medium_objects()
-add_provider_objects()
-add_content_objects()
-new_medium_objects = []
-new_provider_objects = []
-new_content_objects = []
 
-print('Fintech Search...')
-fintech = quick_search('fintech')
-find_or_create_content(fintech)
-add_medium_objects()
-add_provider_objects()
-add_content_objects()
-new_medium_objects = []
-new_provider_objects = []
-new_content_objects = []
 
-print('Crypto search...')
-crypto= quick_search('cryptocurrency')
-find_or_create_content(crypto)
-add_medium_objects()
-add_provider_objects()
-add_content_objects()
-new_medium_objects = []
-new_provider_objects = []
-new_content_objects = []
-
-print('Bitcoin search...')
-bc = quick_search('bitcoin')
-find_or_create_content(bc)
-add_medium_objects()
-add_provider_objects()
-add_content_objects()
-new_medium_objects = []
-new_provider_objects = []
-new_content_objects = []
-
-print('Iot Search...')
-iot = quick_search('IoT')
-find_or_create_content(iot)
-add_medium_objects()
-add_provider_objects()
-add_content_objects()
-new_medium_objects = []
-new_provider_objects = []
-new_content_objects = []
-
-print('Elon Musk Search...')
-EM = quick_search('Elon Musk')
-find_or_create_content(EM)
-add_medium_objects()
-add_provider_objects()
-add_content_objects()
-new_medium_objects = []
-new_provider_objects = []
-new_content_objects = []
-
-print('Netflix search...')
-netflix = quick_search('Netflix')
-find_or_create_content(netflix)
-add_medium_objects()
-add_provider_objects()
-add_content_objects()
-new_medium_objects = []
-new_provider_objects = []
-new_content_objects = []
-
-print('Machine Learning search...')
-machine_learning = quick_search('machine learning')
-find_or_create_content(machine_learning)
-add_medium_objects()
-add_provider_objects()
-add_content_objects()
-new_medium_objects = []
-new_provider_objects = []
-new_content_objects = []
-
-print('Neural Search...')
-nn = quick_search('neural network')
-find_or_create_content(nn)
-add_medium_objects()
-add_provider_objects()
-add_content_objects()
-new_medium_objects = []
-new_provider_objects = []
-new_content_objects = []
-
-print('Google Search...')
-goog = quick_search('Google')
-find_or_create_content(goog)
-add_medium_objects()
-add_provider_objects()
-add_content_objects()
-new_medium_objects = []
-new_provider_objects = []
-new_content_objects = []
+# print('Kavanaugh search...')
+# bk = quick_search('Brett Kavanaugh')
+# find_or_create_content(bk)
+# add_medium_objects()
+# add_provider_objects()
+# add_content_objects()
+# new_medium_objects = []
+# new_provider_objects = []
+# new_content_objects = []
+#
+# print('Election search...')
+# elec = quick_search('election')
+# find_or_create_content(elec)
+# add_medium_objects()
+# add_provider_objects()
+# add_content_objects()
+# new_medium_objects = []
+# new_provider_objects = []
+# new_content_objects = []
+#
+# print('Trump Search...')
+# dt = quick_search('Donald Trump')
+# find_or_create_content(dt)
+# add_medium_objects()
+# add_provider_objects()
+# add_content_objects()
+# new_medium_objects = []
+# new_provider_objects = []
+# new_content_objects = []
+#
+# print('Fintech Search...')
+# fintech = quick_search('fintech')
+# find_or_create_content(fintech)
+# add_medium_objects()
+# add_provider_objects()
+# add_content_objects()
+# new_medium_objects = []
+# new_provider_objects = []
+# new_content_objects = []
+#
+# print('Crypto search...')
+# crypto= quick_search('cryptocurrency')
+# find_or_create_content(crypto)
+# add_medium_objects()
+# add_provider_objects()
+# add_content_objects()
+# new_medium_objects = []
+# new_provider_objects = []
+# new_content_objects = []
+#
+# print('Bitcoin search...')
+# bc = quick_search('bitcoin')
+# find_or_create_content(bc)
+# add_medium_objects()
+# add_provider_objects()
+# add_content_objects()
+# new_medium_objects = []
+# new_provider_objects = []
+# new_content_objects = []
+#
+# print('Iot Search...')
+# iot = quick_search('IoT')
+# find_or_create_content(iot)
+# add_medium_objects()
+# add_provider_objects()
+# add_content_objects()
+# new_medium_objects = []
+# new_provider_objects = []
+# new_content_objects = []
+#
+# print('Elon Musk Search...')
+# EM = quick_search('Elon Musk')
+# find_or_create_content(EM)
+# add_medium_objects()
+# add_provider_objects()
+# add_content_objects()
+# new_medium_objects = []
+# new_provider_objects = []
+# new_content_objects = []
+#
+# print('Netflix search...')
+# netflix = quick_search('Netflix')
+# find_or_create_content(netflix)
+# add_medium_objects()
+# add_provider_objects()
+# add_content_objects()
+# new_medium_objects = []
+# new_provider_objects = []
+# new_content_objects = []
+#
+# print('Machine Learning search...')
+# machine_learning = quick_search('machine learning')
+# find_or_create_content(machine_learning)
+# add_medium_objects()
+# add_provider_objects()
+# add_content_objects()
+# new_medium_objects = []
+# new_provider_objects = []
+# new_content_objects = []
+#
+# print('Neural Search...')
+# nn = quick_search('neural network')
+# find_or_create_content(nn)
+# add_medium_objects()
+# add_provider_objects()
+# add_content_objects()
+# new_medium_objects = []
+# new_provider_objects = []
+# new_content_objects = []
+#
+# print('Google Search...')
+# goog = quick_search('Google')
+# find_or_create_content(goog)
+# add_medium_objects()
+# add_provider_objects()
+# add_content_objects()
+# new_medium_objects = []
+# new_provider_objects = []
+# new_content_objects = []
 
 
     # time.sleep()
