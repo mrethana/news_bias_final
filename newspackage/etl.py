@@ -1,5 +1,7 @@
 # from newspackage.apikeys import *
+
 from apikeys import *
+
 import pafy
 import requests
 import re
@@ -9,7 +11,7 @@ from bs4 import BeautifulSoup
 import pandas as pd
 from IPython.core.display import HTML, Image
 # from PIL import Image
-from models import *
+
 
 sources_list = ['abc-news',
  'associated-press',
