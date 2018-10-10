@@ -29,6 +29,7 @@ For all the articles scraped I utilized NewsAPI, which provided me with URL's to
 #### Labeling Data
 
 In order to label my articles I scraped the classification of left, right and center from https://mediabiasfactcheck.com/. This site classifies news sources as being left, center or right bias. I decided to label anything as left-center or right center as simply center for my task. Below are the sources and labels I used:
+
 ![alt text](https://github.com/mrethana/news_bias_final/blob/master/Screenshots/labels.png?raw=True)
 
 #### Doc2Vec and text pre-processing
@@ -58,3 +59,20 @@ While, PCA is helpful in understanding what Doc2Vec is doing behind the scenes- 
 ![alt text](https://github.com/mrethana/news_bias_final/blob/master/Screenshots/pca.png?raw=True)
 
 #### Training Classification Models based off Doc2Vec Vectors created
+
+For each Doc2Vec model I ran a grid search to get the best hyper-parameters for a Logistic Regression, Random Forest, Decision Tree, AdaBoost and Naive Bayes classifier. I had a slight class imbalance so I used SMOTE to add artificial vectors to the left category making the split roughly 33% per class.
+
+Overall the best validation set accuracy score was from a Random Forest classification (validation set was a new set of 100 articles scraped from the web seperated from test train split). The accuracy between 35%-38% for left, right and center (barely better than random guessing). These were generally the numbers accross each classification model.
+
+To keep track of all models I created a dynamic dashboard to plot the confusion matrix of each (below for decision tree).
+
+![alt text](https://github.com/mrethana/news_bias_final/blob/master/Screenshots/cm.png?raw=True)
+
+
+Additionally, the test and train score difference for each iteration of the grid search was plotted to help spot potential overfitting. This is shown below for my Decision Tree models. As you can see some of the iterations are overfit where there are spikes in the top line (training accuracy). After investigating I realized the decision trees without a set max depth were being overfit and I adjusted my models accordingly.
+
+![alt text](https://github.com/mrethana/news_bias_final/blob/master/Screenshots/grid.png?raw=True)
+
+### Right, Left, Center Classification Conclusions and Next Steps
+1. I would like to try TF-IDF to create my document vectors as opposed to Doc2Vec. Since Doc2Vec is a blackbox model it was very difficult to interpret the feature importances the classification models had. This made it tough to find potential ways to strengthen model. TF-IDF would help me visualize what features the Random Forest was splitting on and which words were most prominent accross the different classes.
+2. Manual classification of documents is needed. It is a huge assumption to make that all New York Times articles are from a centered voice. This context was lost in my analysis and I think stronger labels could improve models.
