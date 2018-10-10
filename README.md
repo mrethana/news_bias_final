@@ -6,14 +6,17 @@ For my final project at Flatiron School I built an interactive dashboard in Jupy
   1. Random Forest classifier to seperate articles by political voice (right, left, center)
   2. Naive Bayes classifier to categorize a sentence as being subjective or objective. Each sentence is categorized when the article is pulled in and the user gets the percent of subjectivity of the articles from each political voice.
 
+
 The video below shows the functionality of the Jupyter Dashboard:
 
 [News Dashboard Preview](https://www.youtube.com/watch?v=gq1i3RDdVsE)
 
+## Objectives
+1. My objective for the dashboard was to provide users with a diverse mix of content in terms of mediums and point of view. Additionally, I wanted to provide readers with insights to the articles before they were read by stating the subjectivity %. This could help a reader identify if they should be exploring other options to get facts about the topic.
 
-## Data Gathering
+2. I wanted to see if there are any trends in the way certain sources cover different topics in terms of subjectivity. I also wanted to see if it was possible to see a distinction between the overall voice of the left, right and center.
 
-### Data
+### Data Gathering
 Overall I used 3 different datasets for the following purposes.
   1. Set of 12,000 articles used to train Doc2Vec model and right, left center classification model
   2. Set of 24,000 articles & amazon reviews (12K of each) used to train objective vs subjective sentence classification model
@@ -21,75 +24,37 @@ Overall I used 3 different datasets for the following purposes.
 
 For all the articles scraped I utilized NewsAPI, which provided me with URL's to articles based on a search query (topic or source name). Link to NewsAPI documentation https://newsapi.org/sources.
 
-#### Gathering and pre-processing for right, left, center classification.
+### Right, left, center classification process
+
+#### Labeling Data
 
 In order to label my articles I scraped the classification of left, right and center from https://mediabiasfactcheck.com/. This site classifies news sources as being left, center or right bias. I decided to label anything as left-center or right center as simply center for my task. Below are the sources and labels I used:
+![alt text](https://github.com/mrethana/news_bias_final/blob/master/Screenshots/labels.png?raw=True)
 
-![alt text](https://github.com/mrethana/spotify_mod_1/blob/master/Screenshots/ORD.png?raw=True)
+#### Doc2Vec and text pre-processing
 
+Overall I trained 10 different Doc2Vec models on my data using different combinations of trigram or bigram vocabulary creation and different Doc2Vec model types (Distributed Memory and Distributed Bag of Words).
 
-To seed our database we collected data from 5 of Spotify's available API's. These API's allowed us to gather data on the following:
-  + Artist's most popular tracks
-  + Information about each artist such as Spotify followers, Spotify id, popularity and genres associated.
-  + Tracks from an artist's album of our choosing
-  + Specific information on each track such as release date, featured artist, runtime, etc.
-  + Audio features of each track- we analyzed 5 main features (valence, danceability, tempo, energy, acousticness). The definitions of each metric as defined by Spotify can be found [here](https://developer.spotify.com/documentation/web-api/reference/tracks/get-audio-features/)
+The image below does a great job highlighting the difference between bag of words and distributed memory.
+![alt text](https://github.com/mrethana/news_bias_final/blob/master/Screenshots/d2v.png?raw=True)
 
-After analyzing all relationships needed to connect the data being scraped we used Object Oriented Programming and SQLAlchemy to create an Object-relational Database (ORD) in SQLite. All relationships can be found in the models.py file in the spotifypackage folder and an example of our classes can be found below.
+##### Steps to Train Doc2Vec
+1. Tokenize documents using nltk's Regular Expressions Tokenizer
+2. Create bigram or trigram tagger to identify the most used phrases in the corpus. This will add these phrases to the vocabulary from each document if present.
+3. Tag each document with appropriate tags. The three tags I used was a unique document tag, a perspective tag (left, right, center) and a source tag (WSJ, NYT, etc.)
 
-![alt text](https://github.com/mrethana/spotify_mod_1/blob/master/Screenshots/ORD.png?raw=True)
+![alt text](https://github.com/mrethana/news_bias_final/blob/master/Screenshots/pre.png?raw=True)
 
-We did have a many-to-many relationship between the tracks and features. To satisfy this relationship we created a join table named trackfeature. This class can be found below.
+4. Choose Doc2Vec model and train
 
-![alt text](https://github.com/mrethana/spotify_mod_1/blob/master/Screenshots/manytomany.png?raw=True)
+#### Visualizing Doc2Vec models with PCA
 
+To visualize the work done in Doc2Vec I reduced the dimensionality of the vectorized documents using PCA. As you can see below we get a nice visual of the vectorized documents from one of the trained models. Doc2Vec also creates a universal vector for each perspective (green points) and each source (blue points).
 
-## Data Visualization using Plotly and Dash
+![alt text](https://github.com/mrethana/news_bias_final/blob/master/Screenshots/viz.png?raw=True)
 
-Once our database was seeded with all relevant data we created an etl.py file to extract, transform and load our data into our Dash app to visualize pertinent information in plotly.
+While, PCA is helpful in understanding what Doc2Vec is doing behind the scenes- the chart below shows the explained variance of using specific amounts of principal components. Using 3 principal components only explains about 20% of the variance in this case so the vectors being visualized are not showing the full story.
 
-#### Artist Trends
-+ On average, Migos' tracks had the highest danceability which wasn't expected, given the other artists in the admittedly limited sample such as Michael Jackson (shown below).
-+ Average acousticness tended to be fairly low for all sampled artists.
+![alt text](https://github.com/mrethana/news_bias_final/blob/master/Screenshots/pca.png?raw=True)
 
-![alt text](https://github.com/mrethana/spotify_mod_1/blob/master/Screenshots/all_features.png?raw=True)
-
-
-#### Genre Findings
-+ Characteristics of artists within the same or similar genres varied across time.
-+ Michael Jackson and Charlie Puth may both be considered high-profile solo pop artists during their respective generations. However, Jackson's songs tended to be higher in energy and valence.
-+ This was also true for Migos and The Notorious B.I.G.
-This may reflect different generational preferences in musical style.
-+ Surprisingly, every artist from older generations had a higher average valence (positivity) than their new-school counterpart. Shown below with Notorious B.I.G. and Migos.
-
-
- ![alt text](https://github.com/mrethana/spotify_mod_1/blob/master/Screenshots/genres.png?raw=True)
-
-#### Popular Tracks Trends
-+ Top tracks from sampled artists tended to be more high-energy and 'danceable', though the artists were diverse in genre and characteristics. Valence was more normally distributed. All distributions are shown below.
-
-
- ![alt text](https://github.com/mrethana/spotify_mod_1/blob/master/Screenshots/popular.png?raw=True)
-
-
- + This was exemplified when analyzing Michael Jackson's most popular songs. These popular tracks were tracks with high danceability. This can be seen below. The solid dots are songs that show up as top tracks on his Spotify page. The y-axis shows popularity and the x-axis shows how high danceability is.
-
-
-  ![alt text](https://github.com/mrethana/spotify_mod_1/blob/master/Screenshots/tracks.png?raw=True)
-
-
-## Challenges/Next Steps
-
-#### Challenges
-+ Moving forward when using the Spotify API I will use the spotipy Python library. This makes it easier to pull from each API. We had difficulty with our API key expiring. We also utilized many nested for loops slowing down our functions. Spotipy would help with this issue moving forward.
-+ We only added a limited amount of artists due to this difficulty working with the API, we would like to add more artists/songs/genres to see if the initial trends we saw held up.
-
-
-#### Next Steps
-+ What characterizes more popular genres, on average, vs less popular genres?
-+ Do any features correlate with each other?
-+ Do songs with featured artists tend to be more popular than songs with only one artist?
-+ Include more artists for within-genre comparisons for a more comprehensive analysis.
-+ Explore changes in characteristics for an artist over time (ex: Taylor Swift, Kanye West).
-+ Predictive models of genre, based on input feature values or vice versa
-+ Analyses across time to understand generational changes in sound preferences, paired with historical events (ex: recessions, presidential elections).
+#### Training Classification Models based off Doc2Vec Vectors created
