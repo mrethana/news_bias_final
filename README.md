@@ -24,6 +24,38 @@ Overall I used 3 different datasets for the following purposes.
 
 For all the articles scraped I utilized NewsAPI, which provided me with URL's to articles based on a search query (topic or source name). Link to NewsAPI documentation https://newsapi.org/sources.
 
+### Objective/Subjective classification process
+
+#### Labeling Data
+
+To label objective vs subjective sentences I used the part of speech tagger in NLTK to flag any sentences with specific parts of speech commonly used in subjective sentences. These included:
+1. predeterminers (all the kids)
+2. comparative and superlative adverb (better, best)
+3. comparative and superlative adjectives (bigger, biggest)
+
+I then trained a simple Naive Bayes classifier with the sentences containing these parts of speech labeled as subjective.
+
+##### Problems with this approach and next steps
+Before moving into my EDA I want to address that this was only the first step in trying to classify subjective sentences. I clearly have a finger on the scale by defining a subjective sentence as ONLY those containing certain parts of speech were flagged. However, I was able to gather some insights from my EDA that will help in strengthening this model. I will go deeper into my next steps identified in my EDA, but my first step moving forward:
+
+  1. Pull sentences from Wikipedia (more objective) and try to find trends in the commonly used parts of speech
+
+#### Feature Engineering
+
+Once I had my Naive Bayes classifier I pulled 4,000 articles to analyze any trends in subjectivity accross different sources related different topics.
+
+Features added to text:
+
+1. Ran each sentence through my classifier to get the total objective and subjective sentences. Additionally, the percent of subjectivity in the article.
+2. I used vader sentiment in nltk and TEXTBLOB to get the polarity of each article and the textblob subjectivity
+3. Utilized NLTK part of speech tagging to get the main subject and sub-topic of each article
+4. Vectorized each of the topics and sub-topics using a pre-trained word2vec model.
+  + Once I had the word embeddings for each topic I used k-means clustering to group similar topics into bukcets.
+  + I used PCA to reduce dimensionality of the embeddings to visualize them. Below is the graph using two principal components.
+
+![alt text](https://github.com/mrethana/news_bias_final/blob/master/Screenshots/w2v.png?raw=True)
+
+
 ### Right, left, center classification process
 
 #### Labeling Data
