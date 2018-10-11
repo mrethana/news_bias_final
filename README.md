@@ -61,7 +61,7 @@ The results from Word2Vec were pretty great. As you can see in the top right cor
 
 #### EDA
 
-Once I had my features I sifted through the data to try to find some relationships between the subjectivity and other features I added. The most interesting info I found is show in the two the graphs below. The y-axis of both graphs show the percent subjectivity from my classifier. Both graphs are showing the subjectivity for ONLY  articles with Donald Trump as the main topic.
+Once I had my features together I sifted through the data to try to find some relationships between the subjectivity and other features I added. The most interesting info I found is show in the two the graphs below. The y-axis of both graphs show the percent subjectivity from my classifier. Both graphs are showing the subjectivity for ONLY  articles with Donald Trump as the main topic.
 
 ![alt text](https://github.com/mrethana/news_bias_final/blob/master/Screenshots/rlc.png?raw=True)
 
@@ -69,9 +69,13 @@ The graph above shows that the center has the lowest subjectivity on average and
 
 ![alt text](https://github.com/mrethana/news_bias_final/blob/master/Screenshots/sources.png?raw=True)
 
-The above graph shows the subjectivity across every source in my corpus. Breitbart has the highest average subjectivity which also makes sense to me.
+The above graph shows the subjectivity across every source in my corpus. Breitbart has the highest average subjectivity which intuitively makes sense, but my next steps will be digging into these articles to confirm
 
-### Conclusions and Next Steps
+### Next Steps
+
+1. Dig deeper into each news source's articles about Donald Trump and try to gain context around the percent subjectivity. Need to confirm how often the sentences classified as subjective are actually subjective.
+
+2. Try to find the parts of speech most often used in the most subjective articles
 
 
 ### Right, left, center classification process
