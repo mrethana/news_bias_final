@@ -50,10 +50,28 @@ Features added to text:
 2. I used vader sentiment in nltk and TEXTBLOB to get the polarity of each article and the textblob subjectivity
 3. Utilized NLTK part of speech tagging to get the main subject and sub-topic of each article
 4. Vectorized each of the topics and sub-topics using a pre-trained word2vec model.
-  + Once I had the word embeddings for each topic I used k-means clustering to group similar topics into bukcets.
-  + I used PCA to reduce dimensionality of the embeddings to visualize them. Below is the graph using two principal components.
+    + Once I had the word embeddings for each topic I used k-means clustering to group similar topics into bukcets.
+    + I used PCA to reduce dimensionality of the embeddings to visualize them. Below is the graph using two principal components.
 
 ![alt text](https://github.com/mrethana/news_bias_final/blob/master/Screenshots/w2v.png?raw=True)
+
+The results from Word2Vec were pretty great. As you can see in the top right corner Djokovic, Nadal and Federer are all group together (all tennis players). Additionally, the main topics in some of the clusters were perfect. 3 of my 6 clusters are shown below. As you can see Serena Williams and Tiger Woods were grouped together. Cluster 1 seems to be identifying entities and cluster 2 locations.
+
+![alt text](https://github.com/mrethana/news_bias_final/blob/master/Screenshots/clusters.png?raw=True)
+
+#### EDA
+
+Once I had my features I sifted through the data to try to find some relationships between the subjectivity and other features I added. The most interesting info I found is show in the two the graphs below. The y-axis of both graphs show the percent subjectivity from my classifier. Both graphs are showing the subjectivity for ONLY  articles with Donald Trump as the main topic.
+
+![alt text](https://github.com/mrethana/news_bias_final/blob/master/Screenshots/rlc.png?raw=True)
+
+The graph above shows that the center has the lowest subjectivity on average and the right has the highest. This intuitively made sense to me so I think I can build off of my model to strengthen it even more.
+
+![alt text](https://github.com/mrethana/news_bias_final/blob/master/Screenshots/sources.png?raw=True)
+
+The above graph shows the subjectivity across every source in my corpus. Breitbart has the highest average subjectivity which also makes sense to me.
+
+### Conclusions and Next Steps
 
 
 ### Right, left, center classification process
