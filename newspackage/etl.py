@@ -1,6 +1,6 @@
-# from newspackage.apikeys import *
-from models import *
-from apikeys import *
+from newspackage.apikeys import *
+from newspackage.models import *
+# from apikeys import *
 
 import pafy
 import requests
@@ -165,9 +165,9 @@ def quick_search(parameter):
         print('Scraping podcasts...')
         audio_df = pd.DataFrame(pull_pods(parameter))
         print('Scraping Videos...')
-        video_df = pd.DataFrame(pull_videos(parameter))
+        # video_df = pd.DataFrame(pull_videos(parameter))
         print('Merging data....')
-        df = df.append(video_df, ignore_index=True)
+        # df = df.append(video_df, ignore_index=True)
         df = df.append(audio_df, ignore_index=True)
         df['search_term'] = parameter
         return df

@@ -6,9 +6,9 @@ new_medium_objects = []
 new_provider_objects = []
 new_content_objects = []
 
-all_medium_titles = {medium.name:medium for medium in Medium.query.all()}
-all_provider_titles = {provider.provider_name: provider for provider in Provider.query.all()}
-all_content_titles = {content.title: content for content in Content.query.all()}
+# all_medium_titles = {medium.name:medium for medium in Medium.query.all()}
+# all_provider_titles = {provider.provider_name: provider for provider in Provider.query.all()}
+# all_content_titles = {content.title: content for content in Content.query.all()}
 
 
 def find_or_create_medium(medium_name):
@@ -39,6 +39,7 @@ def find_or_create_content(dataframe):
         if row.title in all_content_titles.keys():
             pass
         else:
+            print(row.title)
             content_url = row.url
             image_url = row.urlToImage
             # description = str(row.description)
@@ -48,7 +49,9 @@ def find_or_create_content(dataframe):
             medium = find_or_create_medium(row.medium)#Medium(name = 'text')
             provider = find_or_create_provider(row.source_name, row.source_id) #Provider(provider_name = 'The New York Times', newsapi_id='the-new-york-times')
             content_obj = Content(content_url=content_url, image_url=image_url, title=title, published = published,medium = medium,provider=provider,search_param = param)
+            print(content_obj)
             all_content_titles[title] = content_obj
+            new_content_objects.append(content_obj)
 
 
 
@@ -65,11 +68,12 @@ def add_provider_objects():
 def add_content_objects():
     for content in new_content_objects:
         db.session.add(content)
+        print(content)
         db.session.commit()
 
-# print('Blockchain search...')
-# bchain = quick_search('blockchain')
-# find_or_create_content(bchain)
+print('Blockchain search...')
+bchain = quick_search('blockchain')
+find_or_create_content(bchain)
 # print('AI search...')
 # ai = quick_search('artificial intelligence')
 # find_or_create_content(ai)
@@ -80,9 +84,10 @@ def add_content_objects():
 # fund = quick_search('startup funding')
 # find_or_create_content(fund)
 
-# add_medium_objects()
-# add_provider_objects()
-# add_content_objects()
+# print(new_content_objects)
+add_medium_objects()
+add_provider_objects()
+add_content_objects()
 
 
 

@@ -50,7 +50,7 @@ Features added to text:
 2. I used vader sentiment in nltk and TEXTBLOB to get the polarity of each article and the textblob subjectivity
 3. Utilized NLTK part of speech tagging to get the main subject and sub-topic of each article
 4. Vectorized each of the topics and sub-topics using a pre-trained word2vec model.
-    + Once I had the word embeddings for each topic I used k-means clustering to group similar topics into bukcets.
+    + Once I had the word embeddings for each topic I used k-means clustering to group similar topics into buckets.
     + I used PCA to reduce dimensionality of the embeddings to visualize them. Below is the graph using two principal components.
 
 ![alt text](https://github.com/mrethana/news_bias_final/blob/master/Screenshots/w2v.png?raw=True)
@@ -61,7 +61,7 @@ The results from Word2Vec were pretty great. As you can see in the top right cor
 
 #### EDA
 
-Once I had my features together I sifted through the data to try to find some relationships between the subjectivity and other features I added. The most interesting info I found is show in the two the graphs below. The y-axis of both graphs show the percent subjectivity from my classifier. Both graphs are showing the subjectivity for ONLY  articles with Donald Trump as the main topic.
+Once I had my features together I sifted through the data to try to find some relationships between the subjectivity and other features I added. The most interesting info I found is shown in the two the graphs below. The y-axis of both graphs show the percent subjectivity from my classifier. Both graphs are showing the subjectivity for ONLY  articles with Donald Trump as the main topic.
 
 ![alt text](https://github.com/mrethana/news_bias_final/blob/master/Screenshots/rlc.png?raw=True)
 
@@ -128,5 +128,5 @@ Additionally, the test and train score difference for each iteration of the grid
 ![alt text](https://github.com/mrethana/news_bias_final/blob/master/Screenshots/grid.png?raw=True)
 
 ### Right, Left, Center Classification Conclusions and Next Steps
-1. I would like to try TF-IDF to create my document vectors as opposed to Doc2Vec. Since Doc2Vec is a blackbox model it was very difficult to interpret the feature importances the classification models had. This made it tough to find potential ways to strengthen model. TF-IDF would help me visualize what features the Random Forest was splitting on and which words were most prominent accross the different classes.
+1. I would like to try TF-IDF to create my document vectors as opposed to Doc2Vec. Since Doc2Vec is a blackbox model it was very difficult to interpret the feature importances the classification models had. This made it tough to find potential ways to strengthen model. TF-IDF would help me visualize what features were most important for the classification process and which words were most prominent across the different classes.
 2. Manual classification of documents is needed. It is a huge assumption to make that all New York Times articles are from a centered voice. This context was lost in my analysis and I think stronger labels could improve models.
