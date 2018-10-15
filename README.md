@@ -3,7 +3,7 @@
 
 ## Summary
 For my final project at Flatiron School I built an interactive dashboard in Jupyter to consolidate articles, podcasts and videos based on a search term. In addition to this I created the two following classification models, which are built into the dashboard.
-  1. Random Forest classifier to seperate articles by political voice (right, left, center)
+  1. Random Forest classifier to seperate articles by political voice (right, left, center).
   2. Naive Bayes classifier to categorize a sentence as being subjective or objective. Each sentence is categorized when the article is pulled in and the user gets the percent of subjectivity of the articles from each political voice.
 
 
@@ -18,9 +18,9 @@ The video below shows the functionality of the Jupyter Dashboard:
 
 ### Data Gathering
 Overall I used 3 different datasets for the following purposes.
-  1. Set of 12,000 articles used to train Doc2Vec model and right, left center classification model
-  2. Set of 24,000 articles & amazon reviews (12K of each) used to train objective vs subjective sentence classification model
-  3. Scraped data used to populate the live dashboard
+  1. Set of 12,000 articles used to train Doc2Vec model and right, left center classification model.
+  2. Set of 24,000 articles & amazon reviews (12K of each) used to train objective vs subjective sentence classification model.
+  3. Scraped data used to populate the live dashboard.
 
 For all the articles scraped I utilized NewsAPI, which provided me with URL's to articles based on a search query (topic or source name). Link to NewsAPI documentation https://newsapi.org/sources.
 
@@ -29,16 +29,16 @@ For all the articles scraped I utilized NewsAPI, which provided me with URL's to
 #### Labeling Data
 
 To label objective vs subjective sentences I used the part of speech tagger in NLTK to flag any sentences with specific parts of speech commonly used in subjective sentences. These included:
-1. predeterminers (all the kids)
-2. comparative and superlative adverb (better, best)
-3. comparative and superlative adjectives (bigger, biggest)
+1. predeterminers (all the kids).
+2. comparative and superlative adverb (better, best).
+3. comparative and superlative adjectives (bigger, biggest).
 
 I then trained a simple Naive Bayes classifier with the sentences containing these parts of speech labeled as subjective.
 
 ##### Problems with this approach and next steps
-Before moving into my EDA I want to address that this was only the first step in trying to classify subjective sentences. I clearly have a finger on the scale by defining a subjective sentence as ONLY those containing certain parts of speech were flagged. However, I was able to gather some insights from my EDA that will help in strengthening this model. I will go deeper into my next steps identified in my EDA, but my first step moving forward:
+Before moving into my EDA I want to address that this was only the first step in trying to classify subjective sentences. I clearly have a finger on the scale since I am defining a subjective sentence as those containing certain parts of speech. However, I was able to gather some insights from my EDA that will help strengthen this model. I will go deeper into my next steps identified in my EDA, but my first step moving forward:
 
-  1. Pull sentences from Wikipedia (more objective) and try to find trends in the commonly used parts of speech
+  1. Pull sentences from Wikipedia (more objective) and try to find trends in the commonly used parts of speech.
 
 #### Feature Engineering
 
@@ -47,15 +47,15 @@ Once I had my Naive Bayes classifier I pulled 4,000 articles to analyze any tren
 Features added to text:
 
 1. Ran each sentence through my classifier to get the total objective and subjective sentences. Additionally, the percent of subjectivity in the article.
-2. I used vader sentiment in nltk and TEXTBLOB to get the polarity of each article and the textblob subjectivity
-3. Utilized NLTK part of speech tagging to get the main subject and sub-topic of each article
+2. Used vader sentiment in nltk and TEXTBLOB to get the polarity of each article and the textblob subjectivity.
+3. Utilized NLTK part of speech tagging to get the main subject and sub-topic of each article.
 4. Vectorized each of the topics and sub-topics using a pre-trained word2vec model.
-    + Once I had the word embeddings for each topic I used k-means clustering to group similar topics into buckets.
-    + I used PCA to reduce dimensionality of the embeddings to visualize them. Below is the graph using two principal components.
+5. Carry out k-means clustering on word embeddings to group similar topics into buckets.
+6. Perform PCA to reduce dimensionality of the embeddings to visualize them. Below is the graph using two principal components.
 
 ![alt text](https://github.com/mrethana/news_bias_final/blob/master/Screenshots/w2v.png?raw=True)
 
-The results from Word2Vec were pretty great. As you can see in the top right corner Djokovic, Nadal and Federer are all group together (all tennis players). Additionally, the main topics in some of the clusters were perfect. 3 of my 6 clusters are shown below. As you can see Serena Williams and Tiger Woods were grouped together. Cluster 1 seems to be identifying entities and cluster 2 locations.
+The results from Word2Vec were pretty great. As you can see in the top right corner Djokovic, Nadal and Federer are all grouped together (all tennis players). Additionally, the main topics in some of the clusters were perfect. 3 of my 6 clusters are shown below. As you can see Serena Williams and Tiger Woods were grouped together. Cluster 1 seems to be identifying entities and cluster 2 locations.
 
 ![alt text](https://github.com/mrethana/news_bias_final/blob/master/Screenshots/clusters.png?raw=True)
 
@@ -69,13 +69,13 @@ The graph above shows that the center has the lowest subjectivity on average and
 
 ![alt text](https://github.com/mrethana/news_bias_final/blob/master/Screenshots/sources.png?raw=True)
 
-The above graph shows the subjectivity across every source in my corpus. Breitbart has the highest average subjectivity which intuitively makes sense, but my next steps will be digging into these articles to confirm
+The above graph shows the subjectivity across every source in my corpus. Breitbart has the highest average subjectivity which intuitively makes sense, but my next steps will be digging into these articles to confirm.
 
 ### Next Steps
 
 1. Dig deeper into each news source's articles about Donald Trump and try to gain context around the percent subjectivity. Need to confirm how often the sentences classified as subjective are actually subjective.
 
-2. Try to find the parts of speech most often used in the most subjective articles
+2. Try to find the parts of speech most often used in the most subjective articles.
 
 
 ### Right, left, center classification process
@@ -94,13 +94,13 @@ The image below does a great job highlighting the difference between bag of word
 ![alt text](https://github.com/mrethana/news_bias_final/blob/master/Screenshots/d2v.png?raw=True)
 
 ##### Steps to Train Doc2Vec
-1. Tokenize documents using nltk's Regular Expressions Tokenizer
+1. Tokenize documents using nltk's Regular Expressions Tokenizer.
 2. Create bigram or trigram tagger to identify the most used phrases in the corpus. This will add these phrases to the vocabulary from each document if present.
-3. Tag each document with appropriate tags. The three tags I used was a unique document tag, a perspective tag (left, right, center) and a source tag (WSJ, NYT, etc.)
+3. Tag each document with appropriate tags. The three tags I used were a unique document tag, a perspective tag (left, right, center) and a source tag (WSJ, NYT, etc.).
 
 ![alt text](https://github.com/mrethana/news_bias_final/blob/master/Screenshots/pre.png?raw=True)
 
-4. Choose Doc2Vec model and train
+4. Choose Doc2Vec model and train.
 
 #### Visualizing Doc2Vec models with PCA
 
@@ -114,7 +114,7 @@ While, PCA is helpful in understanding what Doc2Vec is doing behind the scenes- 
 
 #### Training Classification Models based off Doc2Vec Vectors created
 
-For each Doc2Vec model I ran a grid search to get the best hyper-parameters for a Logistic Regression, Random Forest, Decision Tree, AdaBoost and Naive Bayes classifier. I had a slight class imbalance so I used SMOTE to add artificial vectors to the left category making the split roughly 33% per class.
+For each Doc2Vec model I ran a grid search to get the best hyper-parameters for a Logistic Regression, Random Forest, Decision Tree, AdaBoost and Naive Bayes classifier. I had a slight class imbalance so I used SMOTE to add artificial vectors to the left category, making the split roughly 33% per class.
 
 Overall the best validation set accuracy score was from a Random Forest classification (validation set was a new set of 100 articles scraped from the web seperated from test train split). The accuracy between 35%-38% for left, right and center (barely better than random guessing). These were generally the numbers accross each classification model.
 
